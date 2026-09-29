@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "tvoidlib",
+  "version": "${version}",
+  "name": "tvoid lib",
+  "description": "Multiplatform modding library. You know how this goes...",
+  "authors": [
+    "tvoid"
+  ],
+  "contact": {
+    "homepage": "https://github.com/tvoidZK/tvoid_lib",
+    "issues": "https://github.com/tvoidZK/tvoid_lib/issues"
+  },
+  "license": "",
+  "icon": "assets/tvoidLib/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.tvoid.lib.fabric.tvoidLibFabric"
+    ],
+    "client": [
+      "net.tvoid.lib.fabric.client.tvoidLibFabricClient"
+    ]
+  },
+  "mixins": [
+    "tvoidLib.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "architectury": ">=22.0.2",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
