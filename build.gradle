@@ -41,6 +41,13 @@ subprojects {
         it.options.release = 25
     }
 
+    def publishCheck = gradle.startParameter.taskNames.any { it.toLowerCase().contains('publish') }
+//    if (publishCheck) {
+//        tasks.withType(Jar).configureEach {
+//            exclude 'net/tvoid/testmod/**', 'assets/testmod/**', 'data/testmod/**'
+//        }
+//    }
+
     publishing {
         publications {
             mavenJava(MavenPublication) {
