@@ -12,7 +12,7 @@
     "issues": "https://github.com/tvoidZK/tvoid_lib/issues"
   },
   "license": "",
-  "icon": "assets/tvoidLib/icon.png",
+  "icon": "assets/tvoidlib/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -23,7 +23,7 @@
     ]
   },
   "mixins": [
-    "tvoidLib.mixins.json"
+    "tvoidlib.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.19.5",

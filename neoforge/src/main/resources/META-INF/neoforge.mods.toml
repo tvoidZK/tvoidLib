@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
-#issueTrackerURL = ""
-license = ""
+issueTrackerURL = "https://github.com/tvoidZK/tvoid_lib/issues"
+license = "tbd"
 
 [[mods]]
 modId = "tvoidlib"
