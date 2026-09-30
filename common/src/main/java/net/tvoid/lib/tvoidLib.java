@@ -19,10 +19,9 @@ public final class tvoidLib {
 //    }
 
     public static void init() {
+        TestMod.init();
         LOGGER.info("Fixing tags. just kidding it's not implemented yet");
         tagFixes.init();
-        // remove before publishing
-        TestMod.init();
     }
 
 //todo

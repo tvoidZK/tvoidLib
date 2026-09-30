@@ -35,4 +35,4 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[mixins]]
-config = "tvoidlib.mixins.json"
+config = "testmod.mixins.json"

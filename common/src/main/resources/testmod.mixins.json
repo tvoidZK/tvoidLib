@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "net.tvoid.lib.mixin",
+  "package": "net.tvoid.testmod.mixin",
   "compatibilityLevel": "JAVA_25",
   "minVersion": "0.8",
   "client": [
