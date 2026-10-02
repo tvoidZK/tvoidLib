@@ -41,4 +41,11 @@ public class ItemRegistrar {
             return factory.apply(properties.apply(new Item.Properties().setId(key)));
         });
     }
+
+ //   RegistrySupplier<T> item = (RegistrySupplier<T>) itemFactory.apply(properties.setId(id));
+//        if (item instanceof BlockItem blockItem) {
+//            blockItem.registerBlocks(Item.BY_BLOCK, item);
+//        }
+    //    return (RegistrySupplier<Item>) Registry.register(BuiltInRegistries.ITEM, id, item);
+//}
 }
