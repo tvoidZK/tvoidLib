@@ -1,4 +1,4 @@
-package net.tvoid.lib.world.item;
+package net.tvoid.lib.register;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
