@@ -11,6 +11,6 @@ public final class TestMod {
 
         public static void init() {
                 LOGGER.info("tvoid lib test mod loaded. Was that supposed to happen?");
-                TestItems.reg();
+                TestItems.init();
         }
 }

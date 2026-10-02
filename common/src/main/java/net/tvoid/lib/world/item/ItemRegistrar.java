@@ -19,19 +19,19 @@ public class ItemRegistrar {
         this.items = DeferredRegister.create(modId, Registries.ITEM);
     }
 
-    public void Items() {
+    public void register() {
         items.register();
     }
 
-    public <T extends Item> RegistrySupplier<T> item(String name, Function<Item.Properties, T> factory) {
-        return item(name, UnaryOperator.identity(), factory);
+    public <T extends Item> RegistrySupplier<T> reg(String name, Function<Item.Properties, T> factory) {
+        return reg(name, UnaryOperator.identity(), factory);
     }
 
-    public RegistrySupplier<Item> item(String name) {
-        return item(name, Item::new);
+    public RegistrySupplier<Item> reg(String name) {
+        return reg(name, Item::new);
     }
 
-    public <T extends Item> RegistrySupplier<T> item(
+    public <T extends Item> RegistrySupplier<T> reg(
             String name,
             UnaryOperator<Item.Properties> properties,
             Function<Item.Properties, T> factory) {
