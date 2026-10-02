@@ -2,7 +2,7 @@ package net.tvoid.testmod.world.item;
 
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.world.item.Item;
-import net.tvoid.lib.world.item.ItemRegistrar;
+import net.tvoid.lib.register.ItemRegistrar;
 import net.tvoid.testmod.TestMod;
 
 public class TestItems {
