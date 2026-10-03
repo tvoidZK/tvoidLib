@@ -9,18 +9,18 @@ public class ArmorRegistrar extends ItemRegistrar {
     public ArmorRegistrar(String modId) { super(modId); }
 
     public RegistrySupplier<Item> helmet(String name, ArmorMaterial material, ArmorType type) {
-        return reg(name, p -> new Item(p.humanoidArmor(material, ArmorType.HELMET)));
+        return regArmor(name, p -> p.humanoidArmor(material, ArmorType.HELMET), Item::new);
     }
 
     public RegistrySupplier<Item> chestplate(String name, ArmorMaterial material, ArmorType type) {
-        return reg(name, p -> new Item(p.humanoidArmor(material, ArmorType.CHESTPLATE)));
+        return regArmor(name, p -> p.humanoidArmor(material, ArmorType.CHESTPLATE), Item::new);
     }
 
     public RegistrySupplier<Item> leggings(String name, ArmorMaterial material, ArmorType type) {
-        return reg(name, p -> new Item(p.humanoidArmor(material, ArmorType.LEGGINGS)));
+        return regArmor(name, p -> p.humanoidArmor(material, ArmorType.LEGGINGS), Item::new);
     }
 
     public RegistrySupplier<Item> boots(String name, ArmorMaterial material, ArmorType type) {
-        return reg(name, p -> new Item(p.humanoidArmor(material, ArmorType.BOOTS)));
+        return regArmor(name, p -> p.humanoidArmor(material, ArmorType.BOOTS), Item::new);
     }
 }
