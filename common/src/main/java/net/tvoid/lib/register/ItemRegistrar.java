@@ -39,7 +39,7 @@ public class ItemRegistrar {
             String name,
             UnaryOperator<Item.Properties> properties,
             Function<Item.Properties, T> factory) {
-        return null;
+        return registerItem(name, properties, factory);
     }
 
     public <T extends Item> RegistrySupplier<T> registerItem(
