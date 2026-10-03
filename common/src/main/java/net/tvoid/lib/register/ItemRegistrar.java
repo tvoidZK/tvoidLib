@@ -23,15 +23,26 @@ public class ItemRegistrar {
         items.register();
     }
 
-    public <T extends Item> RegistrySupplier<T> item(String name, Function<Item.Properties, T> factory) {
-        return item(name, UnaryOperator.identity(), factory);
+    public <T extends Item> RegistrySupplier<T> reg(String name, Function<Item.Properties, T> factory) {
+        return reg(name, UnaryOperator.identity(), factory);
     }
 
-    public RegistrySupplier<Item> item(String name) {
-        return item(name, Item::new);
+    public RegistrySupplier<Item> reg(String name) {
+        return reg(name, Item::new);
     }
 
-    public <T extends Item> RegistrySupplier<T> item(
+    public <T extends Item> RegistrySupplier<T> reg(String name, UnaryOperator<Item.Properties> properties, Function<Item.Properties, T> factory) {
+        return registerItem(name, properties, factory);
+    }
+
+    public <T extends Item> RegistrySupplier<T> regTool(
+            String name,
+            UnaryOperator<Item.Properties> properties,
+            Function<Item.Properties, T> factory) {
+        return null;
+    }
+
+    public <T extends Item> RegistrySupplier<T> registerItem(
             String name,
             UnaryOperator<Item.Properties> properties,
             Function<Item.Properties, T> factory) {
