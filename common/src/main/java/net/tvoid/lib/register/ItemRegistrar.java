@@ -48,6 +48,7 @@ public class ItemRegistrar {
             String name,
             UnaryOperator<Item.Properties> properties,
             Function<Item.Properties, T> factory) {
+        return registerItem(name, properties, factory, handheld);
         return registerItem(name, properties, factory, handheld, equipmentTab);
     }
 
