@@ -1,4 +1,4 @@
-package net.tvoid.lib.references;
+package net.tvoid.lib.reference;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -10,9 +10,9 @@ import net.minecraft.world.item.equipment.trim.TrimPattern;
 import net.minecraft.world.level.block.ColorCollection;
 import net.minecraft.world.level.block.entity.DecoratedPotPattern;
 
-public class ModItemIds {
+public class ItemIds {
     private final String modId;
-    public ModItemIds(String modId) {
+    public ItemIds(String modId) {
         this.modId = modId;
     }
 
