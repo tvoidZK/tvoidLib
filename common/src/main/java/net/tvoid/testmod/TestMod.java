@@ -2,6 +2,7 @@ package net.tvoid.testmod;
 
 import net.tvoid.lib.tvoidLib;
 import net.tvoid.testmod.world.item.TestItems;
+import net.tvoid.testmod.world.level.block.TestBlocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,8 @@ public final class TestMod {
 
         public static void init() {
                 LOGGER.info("tvoid lib test mod loaded. Was that supposed to happen?");
-                TestItems.init();
+                TestBlocks.reg();
+                TestItems.reg();
+                TestTabs.reg();
         }
 }
