@@ -32,10 +32,10 @@ public class BlockRegistrar {
     }
 
     public <T extends Block> RegistrySupplier<T> reg(String name, Function<BlockBehaviour.Properties, T> factory) {
-        return registerBlock(name, UnaryOperator.identity(), factory);
+        return reg(name, UnaryOperator.identity(), factory);
     }
 
-    public <T extends Block> RegistrySupplier<T> registerBlock(
+    public <T extends Block> RegistrySupplier<T> reg(
             String name,
             UnaryOperator<BlockBehaviour.Properties> properties,
             Function<BlockBehaviour.Properties, T> factory) {
