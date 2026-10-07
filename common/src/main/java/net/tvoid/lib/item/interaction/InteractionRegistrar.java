@@ -4,6 +4,8 @@ import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -20,7 +22,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class InteractionRegistrar {
-    private final List<InteractionRecipe> recipes = new ArrayList<>();
+    private final List<InteractionRecipe> interactionRecipes = new ArrayList<>();
+    private final List<HandRecipe> handRecipes = new ArrayList<>();
 
     public InteractionRecipe convertBlock(Object from, Object with, Object to) {
         return add(BlockMatch.of(from), ItemMatch.of(with),
@@ -58,12 +61,41 @@ public class InteractionRegistrar {
         };
     }
 
+    public HandRecipe convertHeld(Object main, Object off, Object result) {
+        return convertHeld(main, off, result, 1);
+    }
+
+    public HandRecipe convertHeld(Object main, Object off, Object result, int count) {
+        HandRecipe r = new HandRecipe(ItemMatch.of(main), ItemMatch.of(off), itemSupplier(result), count);
+        handRecipes.add(r);
+        return r;
+    }
+
     private InteractionRecipe add(Predicate<BlockState> from,
                                   Predicate<ItemStack> with,
                                   InteractionRecipe.Result result) {
         InteractionRecipe r = new InteractionRecipe(from, with, result);
-        recipes.add(r);
+        interactionRecipes.add(r);
         return r;
+    }
+
+    private boolean checkHand(Player player, InteractionHand hand) {
+        if (hand != InteractionHand.MAIN_HAND) return false;
+        ItemStack main = player.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack off = player.getItemInHand(InteractionHand.OFF_HAND);
+
+        for (HandRecipe r : handRecipes) {
+            if (!r.main().test(main) || !r.off().test(off)) continue;
+            if (!player.level().isClientSide()) {
+                //main.shrink(1);
+                ItemStack out = new ItemStack(r.result().get(), r.count());
+                if (!player.getInventory().add(out)) {
+                    Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), out);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     @FunctionalInterface
@@ -72,29 +104,34 @@ public class InteractionRegistrar {
     }
 
     public void reg() {
+        InteractionEvent.RIGHT_CLICK_ITEM.register((player, hand) ->
+                checkHand(player, hand)
+                        ? EventResult.interruptTrue()
+                        : EventResult.pass());
+
         InteractionEvent.RIGHT_CLICK_BLOCK.register((player, hand, pos, face) -> {
+            if (checkHand(player, hand)) return EventResult.interruptTrue();
             Level level = player.level();
             ItemStack stack = player.getItemInHand(hand);
             BlockState state = level.getBlockState(pos);
 
-            for (InteractionRecipe r : recipes) {
-                if (r.from().test(state) && r.with().test(stack)) {
-                    if (!level.isClientSide()) {
-                        switch (r.result()) {
-                            case InteractionRecipe.BlockResult b -> {
-                                level.setBlockAndUpdate(pos, b.block().get().defaultBlockState());
-                                b.after().run(level, pos, state, stack);
-                            }
-                            case InteractionRecipe.ItemResult i -> {
-                                level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-                                Containers.dropItemStack(level,
-                                        pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                                        new ItemStack(i.item().get()));
-                            }
+            for (InteractionRecipe r : interactionRecipes) {
+                if (!r.from().test(state) || !r.with().test(stack)) continue;
+                if (!level.isClientSide()) {
+                    switch (r.result()) {
+                        case InteractionRecipe.BlockResult b -> {
+                            level.setBlockAndUpdate(pos, b.block().get().defaultBlockState());
+                            b.after().run(level, pos, state, stack);
+                        }
+                        case InteractionRecipe.ItemResult i -> {
+                            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                            Containers.dropItemStack(
+                                    level, pos.getX(), pos.getY(), pos.getZ(),
+                                    new ItemStack(i.item().get()));
                         }
                     }
-                    return EventResult.interruptTrue();
                 }
+                return EventResult.interruptTrue();
             }
             return EventResult.pass();
         });
