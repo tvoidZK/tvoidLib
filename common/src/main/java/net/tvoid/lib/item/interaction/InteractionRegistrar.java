@@ -11,9 +11,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.tvoid.lib.helper.BlockMatch;
 import net.tvoid.lib.helper.ItemMatch;
+import net.tvoid.lib.helper.SmeltingTicks;
+import net.tvoid.lib.mixin.FurnaceAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,23 +25,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class InteractionRegistrar {
-    private final List<InteractionRecipe> interactionRecipes = new ArrayList<>();
-    private final List<HandRecipe> handRecipes = new ArrayList<>();
-
-    public InteractionRecipe convertBlock(Object from, Object with, Object to) {
-        return add(BlockMatch.of(from), ItemMatch.of(with),
-                new InteractionRecipe.BlockResult(blockSupplier(to)));
-    }
-
-    public InteractionRecipe convertBlock(Object from, Object with, Object to, AfterAction after) {
-        return add(BlockMatch.of(from), ItemMatch.of(with),
-                new InteractionRecipe.BlockResult(blockSupplier(to), after));
-    }
-
-    public InteractionRecipe convertBlock(Object from, Object with, Object to, BiConsumer<Level, BlockPos> after) {
-        return add(BlockMatch.of(from), ItemMatch.of(with),
-                new InteractionRecipe.BlockResult(blockSupplier(to), after));
-    }
+    private final List<FromBlock> BlockTransformations = new ArrayList<>();
+    private final List<FromItem> ItemTransformations = new ArrayList<>();
 
     private static Supplier<Block> blockSupplier(Object o) {
         return switch (o) {
@@ -46,11 +34,6 @@ public class InteractionRegistrar {
             case Supplier<?> s -> () -> (Block) s.get();
             default -> throw new IllegalArgumentException("Not a valid block output: " + o);
         };
-    }
-
-    public InteractionRecipe dropItem(Object from, Object with, Object drops) {
-        return add(BlockMatch.of(from), ItemMatch.of(with),
-                new InteractionRecipe.ItemResult(itemSupplier(drops)));
     }
 
     private static Supplier<Item> itemSupplier(Object o) {
@@ -61,21 +44,67 @@ public class InteractionRegistrar {
         };
     }
 
-    public HandRecipe convertHeld(Object main, Object off, Object result) {
+    public static AfterAction smeltItem() {
+        return smeltItem(1);
+    }
+
+    public static AfterAction smeltItem(double items) {
+        int t = SmeltingTicks.furnaceItems(items);
+        return (level, pos, old, held) -> {
+            if (level.getBlockEntity(pos) instanceof AbstractFurnaceBlockEntity f
+                    && !f.getItem(0).isEmpty()) {
+                FurnaceAccessor a = (FurnaceAccessor) f;
+                a.tvoid$setLitTimeRemaining(t);
+                a.tvoid$setLitTotalTime(t);
+                f.setChanged();
+            }
+        };
+    }
+
+    public FromBlock convertBlock(Object from, Object with, Object to) {
+        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with),
+                new FromBlock.ToBlock(blockSupplier(to)));
+    }
+
+    public FromBlock convertBlock(Object from, Object with, Object to, AfterAction after) {
+        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with),
+                new FromBlock.ToBlock(blockSupplier(to), after));
+    }
+
+    public FromBlock convertBlock(Object from, Object with, Object to, BiConsumer<Level, BlockPos> after) {
+        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with),
+                new FromBlock.ToBlock(blockSupplier(to), after));
+    }
+
+    public FromBlock dropItem(Object from, Object with, Object drops) {
+        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with),
+                new FromBlock.ToItem(itemSupplier(drops)));
+    }
+
+    public FromItem convertHeld(Object main, Object off, Object result) {
         return convertHeld(main, off, result, 1);
     }
 
-    public HandRecipe convertHeld(Object main, Object off, Object result, int count) {
-        HandRecipe r = new HandRecipe(ItemMatch.of(main), ItemMatch.of(off), itemSupplier(result), count);
-        handRecipes.add(r);
+    public FromItem convertHeld(Object main,
+                                  Object off,
+                                  Object result,
+                                  int count) {
+        FromItem r = new FromItem(ItemMatch.of(main), ItemMatch.of(off), itemSupplier(result), count);
+        ItemTransformations.add(r);
         return r;
     }
 
-    private InteractionRecipe add(Predicate<BlockState> from,
-                                  Predicate<ItemStack> with,
-                                  InteractionRecipe.Result result) {
-        InteractionRecipe r = new InteractionRecipe(from, with, result);
-        interactionRecipes.add(r);
+    public FromBlock blockInteraction(Object from,
+                                      Object with,
+                                      AfterAction action) {
+        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with), new FromBlock.BlockInteraction(action));
+    }
+
+    private FromBlock blockTransformation(Predicate<BlockState> from,
+                                          Predicate<ItemStack> with,
+                                          FromBlock.Result result) {
+        FromBlock r = new FromBlock(from, with, result);
+        BlockTransformations.add(r);
         return r;
     }
 
@@ -84,7 +113,7 @@ public class InteractionRegistrar {
         ItemStack main = player.getItemInHand(InteractionHand.MAIN_HAND);
         ItemStack off = player.getItemInHand(InteractionHand.OFF_HAND);
 
-        for (HandRecipe r : handRecipes) {
+        for (FromItem r : ItemTransformations) {
             if (!r.main().test(main) || !r.off().test(off)) continue;
             if (!player.level().isClientSide()) {
                 //main.shrink(1);
@@ -115,19 +144,22 @@ public class InteractionRegistrar {
             ItemStack stack = player.getItemInHand(hand);
             BlockState state = level.getBlockState(pos);
 
-            for (InteractionRecipe r : interactionRecipes) {
+            for (FromBlock r : BlockTransformations) {
                 if (!r.from().test(state) || !r.with().test(stack)) continue;
                 if (!level.isClientSide()) {
                     switch (r.result()) {
-                        case InteractionRecipe.BlockResult b -> {
+                        case FromBlock.ToBlock b -> {
                             level.setBlockAndUpdate(pos, b.block().get().defaultBlockState());
                             b.after().run(level, pos, state, stack);
                         }
-                        case InteractionRecipe.ItemResult i -> {
+                        case FromBlock.ToItem i -> {
                             level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
                             Containers.dropItemStack(
                                     level, pos.getX(), pos.getY(), pos.getZ(),
                                     new ItemStack(i.item().get()));
+                        }
+                        case FromBlock.BlockInteraction a -> {
+                                a.action().run(level, pos, state, stack);
                         }
                     }
                 }

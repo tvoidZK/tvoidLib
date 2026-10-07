@@ -26,7 +26,7 @@ public class FillContainer {
         return fillContainerSlot(0, new ItemStack(item, count));
     }
 
-    public static InteractionRegistrar.AfterAction fillAndReplace() {
+    public static InteractionRegistrar.AfterAction fillOnConvert() {
         return (level, pos, old, held) -> {
             if (level.getBlockEntity(pos) instanceof Container c && old.getBlock().asItem() != Items.AIR) {
                 fillFirstSlot(new ItemStack(old.getBlock()).getItem());
