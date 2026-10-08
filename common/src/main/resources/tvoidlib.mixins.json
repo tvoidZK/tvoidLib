@@ -6,7 +6,6 @@
   "client": [
   ],
   "mixins": [
-    "FurnaceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

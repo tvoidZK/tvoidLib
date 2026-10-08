@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.tvoid.lib.helper.BlockMatch;
 import net.tvoid.lib.helper.ItemMatch;
 import net.tvoid.lib.helper.SmeltingTicks;
-import net.tvoid.lib.mixin.FurnaceAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +52,7 @@ public class InteractionRegistrar {
         return (level, pos, old, held) -> {
             if (level.getBlockEntity(pos) instanceof AbstractFurnaceBlockEntity f
                     && !f.getItem(0).isEmpty()) {
-                FurnaceAccessor a = (FurnaceAccessor) f;
-                a.tvoid$setLitTimeRemaining(t);
-                a.tvoid$setLitTotalTime(t);
-                f.setChanged();
+                // add fuel
             }
         };
     }
