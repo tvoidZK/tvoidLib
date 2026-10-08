@@ -1,4 +1,4 @@
-package net.tvoid.lib.register.helpers;
+package net.tvoid.lib.helper;
 
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.world.item.Item;

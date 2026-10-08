@@ -1,4 +1,4 @@
-package net.tvoid.lib.tags;
+package net.tvoid.lib.data.tags;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -7,10 +7,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 
-public class TagsHelper {
+public class TagsRegistrar {
     private final String namespace;
 
-    public TagsHelper(String namespace) {
+    public TagsRegistrar(String namespace) {
         this.namespace = namespace;
     }
 

@@ -10,8 +10,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
-import net.tvoid.lib.register.helpers.ArmorSet;
-import net.tvoid.lib.register.helpers.SpearStats;
+import net.tvoid.lib.helper.ArmorSet;
+import net.tvoid.lib.helper.SpearStats;
 
 import java.util.ArrayList;
 import java.util.List;

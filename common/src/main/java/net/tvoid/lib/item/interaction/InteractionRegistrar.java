@@ -39,8 +39,27 @@ public class InteractionRegistrar {
         return switch (o) {
             case Item i -> () -> i;
             case Supplier<?> s -> () -> (Item) s.get();
-            default -> throw new IllegalArgumentException("Not a valid item output: " + o);
+            default -> throw new IllegalArgumentException("Not a valid item: " + o);
         };
+    }
+
+    private boolean checkHand(Player player, InteractionHand hand) {
+        if (hand != InteractionHand.MAIN_HAND) return false;
+        ItemStack main = player.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack off = player.getItemInHand(InteractionHand.OFF_HAND);
+
+        for (FromItem r : ItemTransformations) {
+            if (!r.main().test(main) || !r.off().test(off)) continue;
+            if (!player.level().isClientSide()) {
+                //main.shrink(1);
+                ItemStack out = new ItemStack(r.result().get(), r.count());
+                if (!player.getInventory().add(out)) {
+                    Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), out);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public static AfterAction smeltItem() {
@@ -102,25 +121,6 @@ public class InteractionRegistrar {
         FromBlock r = new FromBlock(from, with, result);
         BlockTransformations.add(r);
         return r;
-    }
-
-    private boolean checkHand(Player player, InteractionHand hand) {
-        if (hand != InteractionHand.MAIN_HAND) return false;
-        ItemStack main = player.getItemInHand(InteractionHand.MAIN_HAND);
-        ItemStack off = player.getItemInHand(InteractionHand.OFF_HAND);
-
-        for (FromItem r : ItemTransformations) {
-            if (!r.main().test(main) || !r.off().test(off)) continue;
-            if (!player.level().isClientSide()) {
-                //main.shrink(1);
-                ItemStack out = new ItemStack(r.result().get(), r.count());
-                if (!player.getInventory().add(out)) {
-                    Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), out);
-                }
-            }
-            return true;
-        }
-        return false;
     }
 
     @FunctionalInterface
