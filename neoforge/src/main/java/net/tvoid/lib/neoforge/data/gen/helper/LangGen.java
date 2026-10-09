@@ -1,4 +1,4 @@
-package net.tvoid.lib.data.gen;
+package net.tvoid.lib.neoforge.data.gen.helper;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,7 +16,6 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 public class LangGen {
-    // use ModLangProvider in NeoForge
     private LangGen() {
     }
 

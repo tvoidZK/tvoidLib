@@ -22,6 +22,9 @@ import java.util.function.UnaryOperator;
 public class ItemRegistrar {
     private final String modId;
     private final DeferredRegister<Item> items;
+    private final List<RegistrySupplier<? extends Item>> block = new ArrayList<>();
+    private Consumer<RegistrySupplier<? extends Item>> mainTab = s -> {};
+    private Consumer<RegistrySupplier<? extends Item>> equipmentTab = s -> {};
     public List<RegistrySupplier<? extends Item>> flat = new ArrayList<>();
     public List<RegistrySupplier<? extends Item>> handheld = new ArrayList<>();
 
@@ -104,6 +107,13 @@ public class ItemRegistrar {
         return registerItem(name, properties, factory, flat, equipmentTab);
     }
 
+    public <T extends Item> RegistrySupplier<T> regBlock(
+            String name,
+            UnaryOperator<Item.Properties> properties,
+            Function<Item.Properties, T> factory) {
+        return registerItem(name, properties, factory, block, mainTab);
+    }
+
     protected <T extends Item> RegistrySupplier<T> registerItem(
             String name,
             UnaryOperator<Item.Properties> properties,
@@ -120,11 +130,9 @@ public class ItemRegistrar {
         return supplier;
         }
 
+    public List<RegistrySupplier<? extends Item>> blockItems() { return block; }
     public List<RegistrySupplier<? extends Item>> flatItems() {return flat;}
     public List<RegistrySupplier<? extends Item>> handheldItems() {return handheld;}
-
-    private Consumer<RegistrySupplier<? extends Item>> mainTab = s -> {};
-    private Consumer<RegistrySupplier<? extends Item>> equipmentTab = s -> {};
 
     public ItemRegistrar tabs(TabRegistrar registrar,
                               RegistrySupplier<CreativeModeTab> main,
@@ -136,5 +144,4 @@ public class ItemRegistrar {
 
     protected Consumer<RegistrySupplier<? extends Item>> mainTab() { return mainTab; }
     protected Consumer<RegistrySupplier<? extends Item>> equipmentTab() { return equipmentTab; }
-
 }

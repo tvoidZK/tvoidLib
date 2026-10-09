@@ -2,7 +2,7 @@ package net.tvoid.lib.neoforge.data.gen;
 
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
-import net.tvoid.lib.data.gen.LangGen;
+import net.tvoid.lib.neoforge.data.gen.helper.LangGen;
 
 import java.nio.file.Path;
 
