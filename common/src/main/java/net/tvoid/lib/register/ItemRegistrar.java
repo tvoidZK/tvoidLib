@@ -45,10 +45,6 @@ public class ItemRegistrar {
         return reg(name, UnaryOperator.identity(), factory);
     }
 
-    public <T extends Item> RegistrySupplier<T> reg(String name, UnaryOperator<Item.Properties> properties, Function<Item.Properties, T> factory) {
-        return registerItem(name, properties, factory, flat, mainTab);
-    }
-
     public RegistrySupplier<Item> sword(String prefix, ToolMaterial mat, Float dmg, Float speed) {
         return regTool(prefix + "_sword", p -> p.sword(mat, dmg, speed), Item::new);
     }
@@ -99,6 +95,10 @@ public class ItemRegistrar {
                 boots(prefix, material));
     }
 
+    public <T extends Item> RegistrySupplier<T> reg(String name, UnaryOperator<Item.Properties> properties, Function<Item.Properties, T> factory) {
+        return registerItem(name, properties, factory, flat, mainTab);
+    }
+
     public <T extends Item> RegistrySupplier<T> regTool(String name, UnaryOperator<Item.Properties> properties, Function<Item.Properties, T> factory) {
         return registerItem(name, properties, factory, handheld, equipmentTab);
     }
@@ -107,10 +107,7 @@ public class ItemRegistrar {
         return registerItem(name, properties, factory, flat, equipmentTab);
     }
 
-    public <T extends Item> RegistrySupplier<T> regBlock(
-            String name,
-            UnaryOperator<Item.Properties> properties,
-            Function<Item.Properties, T> factory) {
+    public <T extends Item> RegistrySupplier<T> regBlock(String name, UnaryOperator<Item.Properties> properties, Function<Item.Properties, T> factory) {
         return registerItem(name, properties, factory, block, mainTab);
     }
 

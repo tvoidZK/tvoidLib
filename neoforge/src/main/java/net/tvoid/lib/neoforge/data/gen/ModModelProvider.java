@@ -13,18 +13,20 @@ import net.tvoid.lib.helper.BlockLayout;
 import net.tvoid.lib.register.BlockRegistrar;
 import net.tvoid.lib.register.ItemRegistrar;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class ModModelProvider extends ModelProvider {
     private final ItemRegistrar items;
     private final BlockRegistrar blocks;
 
-    private boolean isCustom(Block block) {
-        return CUSTOM.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
+    private BlockLayout layoutOf(Block block) {
+        return blocks.layouts().getOrDefault(
+                BuiltInRegistries.BLOCK.getKey(block).getPath(), BlockLayout.CUBE);
     }
 
-    private static final Set<String> CUSTOM = Set.of();
+    private boolean isCustom(Block block) {
+        return layoutOf(block) == BlockLayout.CUSTOM;
+    }
 
     public ModModelProvider(PackOutput output, String modId, ItemRegistrar items, BlockRegistrar blocks) {
         super(output, modId);
@@ -48,11 +50,11 @@ public class ModModelProvider extends ModelProvider {
                 .filter(b -> BuiltInRegistries.BLOCK.getKey(b).getNamespace().equals(modId))
                 .filter(b -> !isCustom(b))
                 .forEach(b -> {
-                    String name = BuiltInRegistries.BLOCK.getKey(b).getPath();
-                    switch (blocks.layouts().getOrDefault(name, BlockLayout.CUBE)) {
+                    switch (layoutOf(b)) {
                         case CUBE -> gen.createTrivialCube(b);
                         case PILLAR -> gen.createTrivialBlock(b, TexturedModel.COLUMN);
                         case GRASS -> gen.createTrivialBlock(b, TexturedModel.CUBE_BOTTOM_TOP);
+                        case CUSTOM -> {}
                     }
                 });
     }
