@@ -54,7 +54,9 @@ public class ModModelProvider extends ModelProvider {
                         case CUBE -> gen.createTrivialCube(b);
                         case PILLAR -> gen.createTrivialBlock(b, TexturedModel.COLUMN);
                         case GRASS -> gen.createTrivialBlock(b, TexturedModel.CUBE_BOTTOM_TOP);
-                        case CUSTOM -> {}
+                        case CUSTOM -> {
+                            return;
+                        }
                     }
                 });
     }

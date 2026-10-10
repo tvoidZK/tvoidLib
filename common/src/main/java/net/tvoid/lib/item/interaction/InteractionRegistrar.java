@@ -112,7 +112,8 @@ public class InteractionRegistrar {
     public FromBlock blockInteraction(Object from,
                                       Object with,
                                       AfterAction action) {
-        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with), new FromBlock.BlockInteraction(action));
+        return blockTransformation(BlockMatch.of(from), ItemMatch.of(with),
+                new FromBlock.BlockInteraction(action));
     }
 
     private FromBlock blockTransformation(Predicate<BlockState> from,
