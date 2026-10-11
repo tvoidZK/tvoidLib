@@ -6,12 +6,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.tvoid.lib.helper.BlockLayout;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -50,22 +52,30 @@ public class BlockRegistrar {
     }
 
     public <T extends Block> RegistrySupplier<T> reg(
+            String name, BlockLayout layout, UnaryOperator<BlockBehaviour.Properties> properties,
+            Function<BlockBehaviour.Properties, T> factory,
+            BiFunction<Block, Item.Properties, ? extends BlockItem> itemFactory) {
+        return registerBlock(name, layout, properties, factory, itemFactory);
+    }
+
+    public <T extends Block> RegistrySupplier<T> reg(
             String name, UnaryOperator<BlockBehaviour.Properties> properties,
             Function<BlockBehaviour.Properties, T> factory) {
-        return registerBlock(name, BlockLayout.CUBE, properties, factory);
+        return registerBlock(name, BlockLayout.CUBE, properties, factory, BlockItem::new);
     }
 
     public <T extends Block> RegistrySupplier<T> reg(
             String name, BlockLayout layout, UnaryOperator<BlockBehaviour.Properties> properties,
             Function<BlockBehaviour.Properties, T> factory) {
-        return registerBlock(name, layout, properties, factory);
+        return registerBlock(name, layout, properties, factory, BlockItem::new);
     }
 
     protected <T extends Block> RegistrySupplier<T> registerBlock(
             String name,
             BlockLayout layout,
             UnaryOperator<BlockBehaviour.Properties> properties,
-            Function<BlockBehaviour.Properties, T> factory) {
+            Function<BlockBehaviour.Properties, T> factory,
+            BiFunction<Block, Item.Properties, ? extends BlockItem> itemFactory) {
         RegistrySupplier<T> supplier = blocks.register(name, () -> {
             ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK,
                     Identifier.fromNamespaceAndPath(modId, name));
@@ -73,7 +83,7 @@ public class BlockRegistrar {
         });
         layouts.put(name, layout);
         items.regBlock(name, p -> p.useBlockDescriptionPrefix(),
-                p -> new BlockItem(supplier.get(), p));
+                p -> itemFactory.apply(supplier.get(), p));
         return supplier;
     }
 

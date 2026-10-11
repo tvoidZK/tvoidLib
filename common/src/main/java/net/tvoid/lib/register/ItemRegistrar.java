@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class ItemRegistrar {
@@ -27,6 +28,8 @@ public class ItemRegistrar {
     private Consumer<RegistrySupplier<? extends Item>> equipmentTab = s -> {};
     public List<RegistrySupplier<? extends Item>> flat = new ArrayList<>();
     public List<RegistrySupplier<? extends Item>> handheld = new ArrayList<>();
+    public record TintedItem(Supplier<? extends Item> item, String model, int color) {}
+    private final List<TintedItem> tinted = new ArrayList<>();
 
     public ItemRegistrar(String modId) {
         this.modId = modId;
@@ -107,6 +110,13 @@ public class ItemRegistrar {
         return registerItem(name, properties, factory, flat, equipmentTab);
     }
 
+    public <T extends Item> RegistrySupplier<T> regTinted(
+            String name, String model, int color, Function<Item.Properties, T> factory) {
+        RegistrySupplier<T> s = registerItem(name, UnaryOperator.identity(), factory, new ArrayList<>(), mainTab);
+        tinted.add(new TintedItem(s, model, color));
+        return s;
+    }
+
     public <T extends Item> RegistrySupplier<T> regBlock(String name, UnaryOperator<Item.Properties> properties, Function<Item.Properties, T> factory) {
         return registerItem(name, properties, factory, block, mainTab);
     }
@@ -130,6 +140,7 @@ public class ItemRegistrar {
     public List<RegistrySupplier<? extends Item>> blockItems() { return block; }
     public List<RegistrySupplier<? extends Item>> flatItems() {return flat;}
     public List<RegistrySupplier<? extends Item>> handheldItems() {return handheld;}
+    public List<TintedItem> tintedItems() { return tinted; }
 
     public ItemRegistrar tabs(TabRegistrar registrar,
                               RegistrySupplier<CreativeModeTab> main,

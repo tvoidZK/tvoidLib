@@ -1,4 +1,4 @@
-package net.tvoid.lib.neoforge.data.gen.helper;
+package net.tvoid.lib.data.gen;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

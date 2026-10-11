@@ -9,7 +9,7 @@ public final class tvoidLib {
     private static final Logger LOGGER = LoggerFactory.getLogger(tvoidLib.libId);
 
     public static void init() {
-        LOGGER.info("Fixing tags. just kidding it's not implemented yet");
+        LOGGER.info("Initializing tvoidlib.");
         tagFixes.init();
     }
 }

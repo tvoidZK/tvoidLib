@@ -4,5 +4,8 @@ public enum BlockLayout {
     CUBE,
     PILLAR,
     GRASS,
-    CUSTOM
+    SHROOM,
+    SHROOM_TINTED,
+    CUSTOM,
+    CUSTOM_ITEM
 }
