@@ -110,8 +110,7 @@ public class ItemRegistrar {
         return registerItem(name, properties, factory, flat, equipmentTab);
     }
 
-    public <T extends Item> RegistrySupplier<T> regTinted(
-            String name, String model, int color, Function<Item.Properties, T> factory) {
+    public <T extends Item> RegistrySupplier<T> regTinted(String name, String model, int color, Function<Item.Properties, T> factory) {
         RegistrySupplier<T> s = registerItem(name, UnaryOperator.identity(), factory, new ArrayList<>(), mainTab);
         tinted.add(new TintedItem(s, model, color));
         return s;
@@ -141,6 +140,10 @@ public class ItemRegistrar {
     public List<RegistrySupplier<? extends Item>> flatItems() {return flat;}
     public List<RegistrySupplier<? extends Item>> handheldItems() {return handheld;}
     public List<TintedItem> tintedItems() { return tinted; }
+
+    public void tint(Supplier<? extends Item> item, String model, int color) {
+        tinted.add(new TintedItem(item, model, color));
+    }
 
     public ItemRegistrar tabs(TabRegistrar registrar,
                               RegistrySupplier<CreativeModeTab> main,

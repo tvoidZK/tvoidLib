@@ -3,8 +3,11 @@ package net.tvoid.lib.neoforge.data.gen;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TexturedModel;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Holder;
@@ -17,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.tvoid.lib.helper.BlockLayout;
 import net.tvoid.lib.register.BlockRegistrar;
 import net.tvoid.lib.register.ItemRegistrar;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +35,10 @@ public class ModModelProvider extends ModelProvider {
                 BuiltInRegistries.BLOCK.getKey(block).getPath(), BlockLayout.CUBE);
     }
 
+    private @Nullable String tintModelOf(Block block) {
+        return blocks.tintModels().get(BuiltInRegistries.BLOCK.getKey(block).getPath());
+    }
+
     private boolean isCustom(Block block) {
         BlockLayout l = layoutOf(block);
         return l == BlockLayout.CUSTOM || l == BlockLayout.CUSTOM_ITEM;
@@ -43,8 +51,8 @@ public class ModModelProvider extends ModelProvider {
         return Files.exists(Path.of(root, "assets", modId, "items", name + ".json"));
     }
 
-    private Material material(String name) {
-        return new Material(Identifier.fromNamespaceAndPath(modId, "item/" + name));
+    private Material material(String folder, String name) {
+        return new Material(Identifier.fromNamespaceAndPath(modId, folder + "/" + name));
     }
 
     public ModModelProvider(PackOutput output, String modId, ItemRegistrar items, BlockRegistrar blocks) {
@@ -54,21 +62,21 @@ public class ModModelProvider extends ModelProvider {
     }
 
     @Override
-    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        genItems(itemModels, items);
+    protected void registerModels(BlockModelGenerators bModels, ItemModelGenerators iModels) {
+        genItems(iModels, items);
         for (ItemRegistrar.TintedItem t : items.tintedItems()) {
             Item item = t.item().get();
             if (hasHandWrittenItem(item)) continue;
 
-            Identifier model = blockModels.createTwoLayeredItemModel(item,
-                    material(t.model()), material(t.model() + "_overlay"));
+            Identifier model = bModels.createTwoLayeredItemModel(item,
+                    material("item", t.model()), material("item", t.model() + "_overlay"));
 
-            blockModels.itemModelOutput.accept(item,
+            bModels.itemModelOutput.accept(item,
                     ItemModelUtils.tintedModel(model,
                             ItemModelUtils.constantTint(0xFFFFFF),
                             ItemModelUtils.constantTint(t.color())));
         }
-        genBlocks(blockModels, blocks);
+        genBlocks(bModels, blocks);
     }
 
     public void genItems(ItemModelGenerators gen, ItemRegistrar items) {
@@ -91,20 +99,37 @@ public class ModModelProvider extends ModelProvider {
                         case PILLAR -> gen.createTrivialBlock(b, TexturedModel.COLUMN);
                         case GRASS -> gen.createTrivialBlock(b, TexturedModel.CUBE_BOTTOM_TOP);
                         case SHROOM -> genStaged(gen, b, BlockModelGenerators.PlantType.NOT_TINTED);
-                        case SHROOM_TINTED -> genStaged(gen, b, BlockModelGenerators.PlantType.TINTED);
+                        case SHROOM_TINTED -> genStaged(gen, b, BlockModelGenerators.PlantType.TINTED, tintModelOf(b));
                         case CUSTOM_ITEM, CUSTOM -> {}
                     }
                 });
     }
 
+    private IntegerProperty ageOf(Block b) {
+        if (b.getStateDefinition().getProperty("age") instanceof IntegerProperty age) return age;
+        throw new IllegalStateException("Shroom layout needs age: " + BuiltInRegistries.BLOCK.getKey(b));
+    }
+
     public void genStaged(BlockModelGenerators gen, Block b, BlockModelGenerators.PlantType plant) {
-        if (!(b.getStateDefinition().getProperty("age") instanceof IntegerProperty age)) {
-            throw new IllegalStateException(
-                    "Shroom layout needs age: "
-                            + BuiltInRegistries.BLOCK.getKey(b));
-        }
+        genStaged(gen, b, plant, null);
+    }
+
+    public void genStaged(BlockModelGenerators gen, Block b, BlockModelGenerators.PlantType plant, @Nullable String sharedTexture) {
+        IntegerProperty age = ageOf(b);
         int[] stages = age.getPossibleValues().stream().mapToInt(Integer::intValue).sorted().toArray();
-        gen.createCrossBlock(b, plant, age, stages);
+
+        if (sharedTexture == null) {
+            gen.createCrossBlock(b, plant, age, stages);
+            return;
+        }
+
+        gen.blockStateOutput.accept(MultiVariantGenerator.dispatch(b)
+                .with(PropertyDispatch.initial(age).generate(i -> {
+                    Identifier model = ModelTemplates.TINTED_CROSS.createWithSuffix(b, "_stage" + i,
+                            TextureMapping.cross(material("block", sharedTexture + "_stage" + i)),
+                            gen.modelOutput);
+                    return BlockModelGenerators.plainVariant(model);
+                })));
     }
 
     @Override

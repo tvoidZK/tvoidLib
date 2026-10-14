@@ -11,10 +11,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.tvoid.lib.helper.BlockLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class BlockRegistrar {
@@ -22,6 +25,10 @@ public class BlockRegistrar {
     private final DeferredRegister<Block> blocks;
     private final ItemRegistrar items;
     private final Map<String, BlockLayout> layouts = new HashMap<>();
+    private final Map<String, String> tintModels = new HashMap<>();
+    private final List<TintedBlock> tinted = new ArrayList<>();
+
+    public record TintedBlock(Supplier<? extends Block> block, String model, int color) {}
 
     public BlockRegistrar(String modId, ItemRegistrar items) {
         this.modId = modId;
@@ -70,6 +77,16 @@ public class BlockRegistrar {
         return registerBlock(name, layout, properties, factory, BlockItem::new);
     }
 
+    public <T extends Block> RegistrySupplier<T> regTinted(
+            String name, BlockLayout layout, String model, int color, UnaryOperator<BlockBehaviour.Properties> properties,
+            Function<BlockBehaviour.Properties, T> factory) {
+        RegistrySupplier<T> s = registerBlock(name, layout, properties, factory, BlockItem::new);
+        items.tint(() -> s.get().asItem(), model, color);
+        tinted.add(new TintedBlock(s, model, color));
+        tintModels.put(name, model);
+        return s;
+    }
+
     protected <T extends Block> RegistrySupplier<T> registerBlock(
             String name,
             BlockLayout layout,
@@ -88,4 +105,6 @@ public class BlockRegistrar {
     }
 
     public Map<String, BlockLayout> layouts() { return layouts; }
+    public Map<String, String> tintModels() { return tintModels; }
+    public List<TintedBlock> tintedBlocks() { return tinted; }
 }
